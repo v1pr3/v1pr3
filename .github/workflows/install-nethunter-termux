@@ -1,16 +1,20 @@
 #!/data/data/com.termux/files/usr/bin/bash -e
-VERSION=2022.1
-BASE_URL=https://kali.download/nethunter-images/kali-2022.1/
+
+VERSION=2020011601
+BASE_URL=https://images.kali.org/nethunter
 USERNAME=kali
+
 function unsupported_arch() {
     printf "${red}"
     echo "[*] Unsupported Architecture\n\n"
     printf "${reset}"
     exit
 }
+
 function ask() {
     # http://djm.me/ask
     while true; do
+
         if [ "${2:-}" = "Y" ]; then
             prompt="Y/n"
             default=Y
@@ -21,14 +25,18 @@ function ask() {
             prompt="y/n"
             default=
         fi
+
         # Ask the question
         printf "${light_cyan}\n[?] "
         read -p "$1 [$prompt] " REPLY
+
         # Default?
         if [ -z "$REPLY" ]; then
             REPLY=$default
         fi
+
         printf "${reset}"
+
         # Check if the reply is valid
         case "$REPLY" in
             Y*|y*) return 0 ;;
@@ -36,6 +44,7 @@ function ask() {
         esac
     done
 }
+
 function get_arch() {
     printf "${blue}[*] Checking device architecture ..."
     case $(getprop ro.product.cpu.abi) in
@@ -50,11 +59,13 @@ function get_arch() {
             ;;
     esac
 }
+
 function set_strings() {
-    CHROOT=kali-${VERSION}                                           
-    IMAGE_NAME=nethunter-2022.1-generic-${SYS_ARCH}-kalifs-full.zip  
-    SHA_NAME=nethunter-2022.1-generic-${SYS_ARCH}-kalifs-full.zip.sha512sum
+    CHROOT=kali-${SYS_ARCH}
+    IMAGE_NAME=kalifs-${SYS_ARCH}-full.tar.xz
+    SHA_NAME=kalifs-${SYS_ARCH}-full.sha512sum
 }    
+
 function prepare_fs() {
     unset KEEP_CHROOT
     if [ -d ${CHROOT} ]; then
@@ -65,6 +76,7 @@ function prepare_fs() {
         fi
     fi
 } 
+
 function cleanup() {
     if [ -f ${IMAGE_NAME} ]; then
         if ask "Delete downloaded rootfs file?" "N"; then
@@ -77,11 +89,13 @@ function cleanup() {
         fi
     fi
 } 
+
 function check_dependencies() {
     printf "${blue}\n[*] Checking package dependencies...${reset}\n"
     ## Workaround for termux-app issue #1283 (https://github.com/termux/termux-app/issues/1283)
     ##apt update -y &> /dev/null
     apt-get update -y &> /dev/null || apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade -y &> /dev/null
+
     for i in proot tar axel; do
         if [ -e $PREFIX/bin/$i ]; then
             echo "  $i is OK"
@@ -95,10 +109,13 @@ function check_dependencies() {
     done
     apt upgrade -y
 }
+
+
 function get_url() {
     ROOTFS_URL="${BASE_URL}/${IMAGE_NAME}"
     SHA_URL="${BASE_URL}/${SHA_NAME}"
 }
+
 function get_rootfs() {
     unset KEEP_IMAGE
     if [ -f ${IMAGE_NAME} ]; then
@@ -114,6 +131,7 @@ function get_rootfs() {
     get_url
     axel ${EXTRA_ARGS} --alternate "$ROOTFS_URL"
 }
+
 function get_sha() {
     if [ -z $KEEP_IMAGE ]; then
         printf "\n${blue}[*] Getting SHA ... ${reset}\n\n"
@@ -124,6 +142,7 @@ function get_sha() {
         axel ${EXTRA_ARGS} --alternate "${SHA_URL}"
     fi
 }
+
 function verify_sha() {
     if [ -z $KEEP_IMAGE ]; then
         printf "\n${blue}[*] Verifying integrity of rootfs...${reset}\n\n"
@@ -133,6 +152,7 @@ function verify_sha() {
         }
     fi
 }
+
 function extract_rootfs() {
     if [ -z $KEEP_CHROOT ]; then
         printf "\n${blue}[*] Extracting rootfs... ${reset}\n\n"
@@ -141,6 +161,8 @@ function extract_rootfs() {
         printf "${yellow}[!] Using existing rootfs directory${reset}\n"
     fi
 }
+
+
 function create_launcher() {
     NH_LAUNCHER=${PREFIX}/bin/nethunter
     NH_SHORTCUT=${PREFIX}/bin/nh
@@ -153,10 +175,12 @@ unset LD_PRELOAD
 if [ ! -f $CHROOT/root/.version ]; then
     touch $CHROOT/root/.version
 fi
+
 ## Default user is "kali"
 user="$USERNAME"
 home="/home/\$user"
 start="sudo -u kali /bin/bash"
+
 ## NH can be launched as root with the "-r" cmd attribute
 ## Also check if user kali exists, if not start as root
 if grep -q "kali" ${CHROOT}/etc/passwd; then
@@ -172,6 +196,7 @@ if [[ \$KALIUSR == "0" || ("\$#" != "0" && ("\$1" == "-r" || "\$1" == "-R")) ]];
         shift
     fi
 fi
+
 cmdline="proot \\
         --link2symlink \\
         -0 \\
@@ -186,6 +211,7 @@ cmdline="proot \\
            TERM=\$TERM \\
            LANG=C.UTF-8 \\
            \$start"
+
 cmd="\$@"
 if [ "\$#" == "0" ];then
     exec \$cmdline
@@ -193,6 +219,7 @@ else
     \$cmdline -c "\$cmd"
 fi
 EOF
+
     chmod 700 $NH_LAUNCHER
     if [ -L ${NH_SHORTCUT} ]; then
         rm -f ${NH_SHORTCUT}
@@ -200,11 +227,14 @@ EOF
     if [ ! -f ${NH_SHORTCUT} ]; then
         ln -s ${NH_LAUNCHER} ${NH_SHORTCUT} >/dev/null
     fi
+   
 }
+
 function create_kex_launcher() {
     KEX_LAUNCHER=${CHROOT}/usr/bin/kex
     cat > $KEX_LAUNCHER <<- EOF
 #!/bin/bash
+
 function start-kex() {
     if [ ! -f ~/.vnc/passwd ]; then
         passwd-kex
@@ -219,15 +249,18 @@ function start-kex() {
     starting_kex=1
     return 0
 }
+
 function stop-kex() {
     vncserver -kill :1 | sed s/"Xtigervnc"/"NetHunter KeX"/
     vncserver -kill :2 | sed s/"Xtigervnc"/"NetHunter KeX"/
     return $?
 }
+
 function passwd-kex() {
     vncpasswd
     return $?
 }
+
 function status-kex() {
     sessions=\$(vncserver -list | sed s/"TigerVNC"/"NetHunter KeX"/)
     if [[ \$sessions == *"590"* ]]; then
@@ -240,10 +273,12 @@ function status-kex() {
     fi
     return 0
 }
+
 function kill-kex() {
     pkill Xtigervnc
     return \$?
 }
+
 case \$1 in
     start)
         start-kex
@@ -270,19 +305,24 @@ EOF
 
     chmod 700 $KEX_LAUNCHER
 }
+
 function fix_profile_bash() {
     ## Prevent attempt to create links in read only filesystem
     if [ -f ${CHROOT}/root/.bash_profile ]; then
         sed -i '/if/,/fi/d' "${CHROOT}/root/.bash_profile"
     fi
 }
+
 function fix_sudo() {
     ## fix sudo & su on start
     chmod +s $CHROOT/usr/bin/sudo
     chmod +s $CHROOT/usr/bin/su
-    echo "kali    ALL=(ALL:ALL) ALL" > $CHROOT/etc/sudoers.d/kali
+	echo "kali    ALL=(ALL:ALL) ALL" > $CHROOT/etc/sudoers.d/kali
+
+    # https://bugzilla.redhat.com/show_bug.cgi?id=1773148
     echo "Set disable_coredump false" > $CHROOT/etc/sudo.conf
 }
+
 function fix_uid() {
     ## Change kali uid and gid to match that of the termux user
     USRID=$(id -u)
@@ -292,28 +332,22 @@ function fix_uid() {
 }
 
 function print_banner() {
-clear
-print "${blue}...........................r3dLag......\n"
-print "${blue},..............................,,,.....\n"
-print "${blue}++;,,......................,,:;+;,.....\n"
-print "${blue}:*?*;;::,..............,,:;;+*?;,......\n"
-print "${blue}.:+;;;::;;:,,.......,:;;;::;;+;,.......\n"
-print "${blue}..:+:;+:.,:;;;:,,,;;;:,.,;+:;;,........\n"
-print "${blue}...:*:,;+:..,:****;,..,;+:,++,.........\n"
-print "${blue}....:*:.:**;+;:,,:;;;+?;,,++...........\n"
-print "${blue}.....:?+++;?+,.....:*+;++*+............\n"
-print "${blue}....,,;+++?;..,;*;,.:++,..,?+++;:,.....\n"
-print "${blue}:**;,..,*;...,+*+*:...,*;..,:+?;,......\n"
-print "${blue},:+*:...,*;....;*,...,*;...,+*;,.......\n"
-print "${blue}...:+*:..,*+...:*...:?;..,+*;,.........\n"
-print "${blue}.....:+*;.,*+..:*..:?;.,+*;,...........\n"
-print "${blue}.......:+*;,**.:?.:?;,+*;,.............\n"
-print "${blue}.........:**;?+;?:?++*;,...............\n"
-print "${blue}...........:+?S%%S%*;,.................\n"
-print "${blue}.............,*SS%;,...................\n"
-print "${blue}...............,:......................\n"
-print "${blue}.............v1pr3.....................\n"${reset}\n\n"
+    clear
+    printf "${blue}##################################################\n"
+    printf "${blue}##                                              ##\n"
+    printf "${blue}##  88      a8P         db        88        88  ##\n"
+    printf "${blue}##  88    .88'         d88b       88        88  ##\n"
+    printf "${blue}##  88   88'          d8''8b      88        88  ##\n"
+    printf "${blue}##  88 d88           d8'  '8b     88        88  ##\n"
+    printf "${blue}##  8888'88.        d8YaaaaY8b    88        88  ##\n"
+    printf "${blue}##  88P   Y8b      d8''''''''8b   88        88  ##\n"
+    printf "${blue}##  88     '88.   d8'        '8b  88        88  ##\n"
+    printf "${blue}##  88       Y8b d8'          '8b 888888888 88  ##\n"
+    printf "${blue}##                                              ##\n"
+    printf "${blue}####  ############# NetHunter ####################${reset}\n\n"
 }
+
+
 ##################################
 ##              Main            ##
 
