@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash -e
 
 VERSION=2022.1
-BASE_URL=https://kali.download/nethunter-images
+BASE_URL=https://kali.download/nethunter-images/kali-2022.1/
 USERNAME=kali
 
 function unsupported_arch() {
@@ -61,8 +61,8 @@ function get_arch() {
 }
 
 function set_strings() {
-    CHROOT=kali-${VERSION}
-    IMAGE_NAME=nethunter-2022.1-generic-${SYS_ARCH}-kalifs-full.zip
+    CHROOT=kali-${VERSION}                                           
+    IMAGE_NAME=nethunter-2022.1-generic-${SYS_ARCH}-kalifs-full.zip  
     SHA_NAME=nethunter-2022.1-generic-${SYS_ARCH}-kalifs-full.zip.sha512sum
 }    
 
