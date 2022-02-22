@@ -245,29 +245,29 @@ function kill-kex() {
     return \$?
 }
 case \$1 in
- start)
- start-kex
-  ;; ;; ;;
- stop)
- stop-kex
-  ;; ;; ;;
- status)
- status-kex
-  ;; ;; ;;
- passwd)
- passwd-kex
-  ;; ;; ;;
- kill)
- kill-kex
-  ;; ;; ;;
+    start)
+        start-kex
+        ;;
+    stop)
+        stop-kex
+        ;;
+    status)
+        status-kex
+        ;;
+    passwd)
+        passwd-kex
+        ;;
+    kill)
+        kill-kex
+        ;;
     *)
- stop-kex
- start-kex
- status-kex
-  ;; ;; ;;
-  esac
-  EOF
-#KEX_LAUNCHER
+        stop-kex
+        start-kex
+        status-kex
+        ;;
+esac
+EOF
+
     chmod 700 $KEX_LAUNCHER
 }
 function fix_profile_bash() {
@@ -347,8 +347,9 @@ fix_profile_bash
 fix_sudo
 create_kex_launcher
 fix_uid
+
 print_banner
-printf "${green}[=] Kali NetHunter for Termux installed successfully${reset}\n"
+printf "${green}[=] Kali NetHunter for Termux installed successfully${reset}\n\n"
 printf "${green}[+] To start Kali NetHunter, type:${reset}\n"
 printf "${green}[+] nethunter             # To start NetHunter CLI${reset}\n"
 printf "${green}[+] nethunter kex passwd  # To set the KeX password${reset}\n"
@@ -361,5 +362,4 @@ printf "${green}[+] nethunter -r          # To run NetHunter as root${reset}\n"
 #printf "${green}[+] nethunter kex stop    # To stop NetHunter GUI root session${reset}\n"
 #printf "${green}[+] nethunter -r kex kill # To stop all NetHunter GUI sessions${reset}\n"
 #printf "${green}[+] nethunter -r kex <command> # Run command in NetHunter env as root${reset}\n"
-printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n"
-;
+printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n\n"
