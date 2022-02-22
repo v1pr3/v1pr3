@@ -203,8 +203,7 @@ EOF
 }
 function create_kex_launcher() {
     KEX_LAUNCHER=${CHROOT}/usr/bin/kex
-    cat > $KEX_LAUNCHER 
-    <<-EOF
+    cat > $KEX_LAUNCHER <<- EOF
 #!/bin/bash
 function start-kex() {
     if [ ! -f ~/.vnc/passwd ]; then
