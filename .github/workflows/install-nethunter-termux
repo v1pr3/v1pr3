@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash -e
 
 VERSION=2022.1
-BASE_URL=https://kali.download/nethunter-images/
+BASE_URL=https://kali.download/nethunter-images
 USERNAME=kali
 
 function unsupported_arch() {
