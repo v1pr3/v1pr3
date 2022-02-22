@@ -203,8 +203,8 @@ EOF
 }
 function create_kex_launcher() {
     KEX_LAUNCHER=${CHROOT}/usr/bin/kex
-    cat > $KEX_LAUNCHER <<- 
-    EOF
+    cat > $KEX_LAUNCHER 
+    <<-EOF
 #!/bin/bash
 function start-kex() {
     if [ ! -f ~/.vnc/passwd ]; then
@@ -362,5 +362,4 @@ printf "${green}[+] nethunter -r          # To run NetHunter as root${reset}\n"
 #printf "${green}[+] nethunter kex stop    # To stop NetHunter GUI root session${reset}\n"
 #printf "${green}[+] nethunter -r kex kill # To stop all NetHunter GUI sessions${reset}\n"
 #printf "${green}[+] nethunter -r kex <command> # Run command in NetHunter env as root${reset}\n"
-printf "${green}[+] nh                    # Shortcut for nethunter
-${reset}\n\n"
+printf "${green}[+] nh                    # Shortcut for nethunter${reset}\n\n"
